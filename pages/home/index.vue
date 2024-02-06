@@ -5,7 +5,9 @@ const { resAllCheck, allCheckAPI, resDeleteCheck, deleteCheckAPI } = useApi();
 const isLoading = ref(false);
 
 const getAllCheck = async () => {
+  isLoading.value = true;
   await allCheckAPI();
+  isLoading.value = false;
 };
 
 const deleteCheck = async (id: number) => {
@@ -15,21 +17,28 @@ const deleteCheck = async (id: number) => {
   isLoading.value = false;
 };
 
+const showFormCheck = () => {
+  const modEl: HTMLDialogElement | null = document.querySelector("#checkFrom");
+  if (modEl) modEl.showModal();
+};
+
 onMounted(() => {
   if (!authStore.$state.token) {
     useRouter().replace("/");
     return;
   }
-  isLoading.value = true;
   getAllCheck();
-  isLoading.value = false;
 });
 </script>
 
 <template>
   <div class="h-[100dvh] flex flex-col gap-4 p-4 bg-slate-50">
     <div>
-      <button type="button" class="bg-blue-500 p-2 rounded text-slate-50">
+      <button
+        @click="showFormCheck"
+        type="button"
+        class="bg-blue-500 p-2 rounded text-slate-50"
+      >
         Tambah Check List
       </button>
     </div>
@@ -46,7 +55,7 @@ onMounted(() => {
             <Icon name="mdi:trash" class="text-red-600" />
           </button>
         </div>
-        <p>Item:</p>
+        <p v-if="item.items">Item:</p>
         <div v-if="item.items" v-for="det in item.items" class="border-b">
           <p>{{ det.name }}</p>
           <p>
@@ -56,6 +65,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <ModalTambahCheck @show-load="isLoading = !isLoading" @done="getAllCheck" />
     <Loading :is-loading="isLoading" />
   </div>
 </template>

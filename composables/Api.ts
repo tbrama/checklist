@@ -113,6 +113,34 @@ export const useApi = () => {
     }
   };
 
+  const resAddCheck = ref<any>();
+  const addCheckAPI = async (data: { name: string }) => {
+    try {
+      resAddCheck.value = await $fetch(baseURL + "/checklist", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${authStore.$state.token}`,
+        },
+        body: data,
+      });
+    } catch (error) {
+      const textError = String(error);
+      if (textError.includes("401")) {
+        authStore.resetToken();
+        useRouter().replace("/");
+        return;
+      }
+      const txt = textError.replaceAll("(", "");
+      const splitError = txt.split(" ");
+      throw createError({
+        statusCode: parseInt(splitError[2]),
+        message: "addCheckAPI",
+        fatal: true,
+      });
+    }
+  };
+
   return {
     resRegister,
     regsiterAPI,
@@ -122,5 +150,7 @@ export const useApi = () => {
     allCheckAPI,
     resDeleteCheck,
     deleteCheckAPI,
+    resAddCheck,
+    addCheckAPI,
   };
 };
