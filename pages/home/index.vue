@@ -1,7 +1,14 @@
 <script lang="ts" setup>
 const authStore = useAuthStore();
 
-const { resAllCheck, allCheckAPI, resDeleteCheck, deleteCheckAPI } = useApi();
+const {
+  resAllCheck,
+  allCheckAPI,
+  resDeleteCheck,
+  deleteCheckAPI,
+  resUpStCheckItem,
+  upStCheckItemAPI,
+} = useApi();
 const isLoading = ref(false);
 
 const getAllCheck = async () => {
@@ -30,6 +37,12 @@ const showFormCheckItem = (id: number) => {
   if (modEl) modEl.showModal();
 };
 
+const updateStatus = async (idcheck: number, iditem: number) => {
+  isLoading.value = true;
+  await upStCheckItemAPI({ id: idcheck, idItem: iditem });
+  await allCheckAPI();
+  isLoading.value = false;
+};
 onMounted(() => {
   if (!authStore.$state.token) {
     useRouter().replace("/");
@@ -51,7 +64,7 @@ onMounted(() => {
       </button>
     </div>
     <div v-if="!isLoading && resAllCheck" class="flex gap-2">
-      <div v-for="item in resAllCheck.data" class="p-4 rounded shadow">
+      <div v-for="(item, index) in resAllCheck.data" class="p-4 rounded shadow">
         <div class="flex justify-between gap-4">
           <p class="font-bold">
             {{ item.name }}
@@ -64,12 +77,26 @@ onMounted(() => {
           </button>
         </div>
         <p v-if="item.items">Item:</p>
-        <div v-if="item.items" v-for="det in item.items" class="border-b">
+        <div
+          v-if="item.items"
+          v-for="(det, iItem) in item.items"
+          class="border-b"
+        >
           <p>{{ det.name }}</p>
           <p>
             status item:
             {{ det.itemCompletionStatus ? "Selesai" : "Belum Selesai" }}
           </p>
+          <label :for="item.id + '_' + det.id" class="flex justify-between"
+            >Status<input
+              v-if="resAllCheck.data[index].items"
+              :id="item.id + '_' + det.id"
+              type="checkbox"
+              v-model="
+                resAllCheck.data[index].items[iItem].itemCompletionStatus
+              "
+              @change="updateStatus(item.id, det.id)"
+          /></label>
         </div>
         <div>
           <button

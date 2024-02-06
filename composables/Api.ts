@@ -175,6 +175,36 @@ export const useApi = () => {
     }
   };
 
+  const resUpStCheckItem = ref<any>();
+  const upStCheckItemAPI = async (data: { id: number; idItem: number }) => {
+    try {
+      resUpStCheckItem.value = await $fetch(
+        baseURL + "/checklist/" + data.id + "/item/" + data.idItem,
+        {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${authStore.$state.token}`,
+          },
+        }
+      );
+    } catch (error) {
+      const textError = String(error);
+      if (textError.includes("401")) {
+        authStore.resetToken();
+        useRouter().replace("/");
+        return;
+      }
+      const txt = textError.replaceAll("(", "");
+      const splitError = txt.split(" ");
+      throw createError({
+        statusCode: parseInt(splitError[2]),
+        message: "upStCheckItemAPI",
+        fatal: true,
+      });
+    }
+  };
+
   return {
     resRegister,
     regsiterAPI,
@@ -188,5 +218,7 @@ export const useApi = () => {
     addCheckAPI,
     resAddCheckItem,
     addCheckItemAPI,
+    resUpStCheckItem,
+    upStCheckItemAPI,
   };
 };
