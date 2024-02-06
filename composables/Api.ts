@@ -80,7 +80,34 @@ export const useApi = () => {
       const splitError = txt.split(" ");
       throw createError({
         statusCode: parseInt(splitError[2]),
-        message: "Login",
+        message: "All check",
+        fatal: true,
+      });
+    }
+  };
+
+  const resDeleteCheck = ref<any>();
+  const deleteCheckAPI = async (id: number) => {
+    try {
+      resDeleteCheck.value = await $fetch(baseURL + "/checklist/" + id, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${authStore.$state.token}`,
+        },
+      });
+    } catch (error) {
+      const textError = String(error);
+      if (textError.includes("401")) {
+        authStore.resetToken();
+        useRouter().replace("/");
+        return;
+      }
+      const txt = textError.replaceAll("(", "");
+      const splitError = txt.split(" ");
+      throw createError({
+        statusCode: parseInt(splitError[2]),
+        message: "Delete check",
         fatal: true,
       });
     }
@@ -93,5 +120,7 @@ export const useApi = () => {
     loginAPI,
     resAllCheck,
     allCheckAPI,
+    resDeleteCheck,
+    deleteCheckAPI,
   };
 };
