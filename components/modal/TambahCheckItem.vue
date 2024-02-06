@@ -2,35 +2,48 @@
 import { required, helpers, email, sameAs } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 
-const { resAddCheck, addCheckAPI } = useApi();
+const props = defineProps({
+  idCheck: { type: Number, required: true },
+});
+
+const { resAddCheckItem, addCheckItemAPI } = useApi();
 
 const emit = defineEmits(["show-load", "done"]);
 
 const close = () => {
-  const modEl: HTMLDialogElement | null = document.querySelector("#checkFrom");
+  const modEl: HTMLDialogElement | null =
+    document.querySelector("#checkItemFrom");
   if (modEl) modEl.close();
 };
 
+watch(
+  () => props.idCheck,
+  (newID) => {
+    if (newID) dataCheck.id = newID;
+  }
+);
+
 const dataCheck = reactive({
-  name: "",
+  data: { itemName: "" },
+  id: props.idCheck,
 });
 
 const rules = computed(() => {
   return {
-    name: {
-      required: helpers.withMessage("Nama wajib di isi", required),
+    itemName: {
+      required: helpers.withMessage("Nama item wajib di isi", required),
     },
   };
 });
 
-const v$ = useVuelidate(rules, dataCheck);
+const v$ = useVuelidate(rules, dataCheck.data);
 
 const postCheck = async () => {
   v$.value.$validate();
   if (!v$.value.$error) {
     close();
     emit("show-load");
-    await addCheckAPI(dataCheck);
+    await addCheckItemAPI(dataCheck);
     // console.log(resRegister.value);
     emit("show-load");
     emit("done");
@@ -39,12 +52,12 @@ const postCheck = async () => {
 </script>
 
 <template>
-  <dialog id="checkFrom" class="bg-transparent">
+  <dialog id="checkItemFrom" class="bg-transparent">
     <div class="flex flex-col h-full">
       <div
         class="p-2 font-bold bg-blue-500 flex justify-between items-center rounded-t"
       >
-        <p class="text-slate-50">Tambah Check</p>
+        <p class="text-slate-50">Tambah Check Item</p>
         <button @click="close">
           <Icon name="mdi:close-circle" class="text-slate-50 text-xl" />
         </button>
@@ -54,12 +67,12 @@ const postCheck = async () => {
       >
         <InputText
           id="name"
-          label="Nama"
+          label="Nama Item"
           class="w-[250px]"
-          v-model="dataCheck.name"
-          :error="v$.name.$error"
-          :error-msg="v$.name.$errors.length ? v$.name.$errors[0].$message as string:''"
-          @update:model-value="v$.name.$touch()"
+          v-model="dataCheck.data.itemName"
+          :error="v$.itemName.$error"
+          :error-msg="v$.itemName.$errors.length ? v$.itemName.$errors[0].$message as string:''"
+          @update:model-value="v$.itemName.$touch()"
         />
         <button
           @click="postCheck"

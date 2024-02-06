@@ -22,6 +22,14 @@ const showFormCheck = () => {
   if (modEl) modEl.showModal();
 };
 
+const checkId = ref(0);
+const showFormCheckItem = (id: number) => {
+  checkId.value = id;
+  const modEl: HTMLDialogElement | null =
+    document.querySelector("#checkItemFrom");
+  if (modEl) modEl.showModal();
+};
+
 onMounted(() => {
   if (!authStore.$state.token) {
     useRouter().replace("/");
@@ -63,9 +71,23 @@ onMounted(() => {
             {{ det.itemCompletionStatus ? "Selesai" : "Belum Selesai" }}
           </p>
         </div>
+        <div>
+          <button
+            @click="showFormCheckItem(item.id)"
+            type="button"
+            class="bg-green-700 p-1 rounded text-slate-50 text-xs mt-2"
+          >
+            Tambah item
+          </button>
+        </div>
       </div>
     </div>
     <ModalTambahCheck @show-load="isLoading = !isLoading" @done="getAllCheck" />
+    <ModalTambahCheckItem
+      :id-check="checkId"
+      @show-load="isLoading = !isLoading"
+      @done="getAllCheck"
+    />
     <Loading :is-loading="isLoading" />
   </div>
 </template>
