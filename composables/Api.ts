@@ -1,3 +1,4 @@
+import type { AllCheck } from "~/utils/interface/AllCheck";
 import type { Login } from "~/utils/interface/Login";
 import type { Register } from "~/utils/interface/Register";
 
@@ -58,7 +59,7 @@ export const useApi = () => {
     }
   };
 
-  const resAllCheck = ref<Login>();
+  const resAllCheck = ref<AllCheck>();
   const allCheckAPI = async () => {
     try {
       resAllCheck.value = await $fetch(baseURL + "/checklist", {
